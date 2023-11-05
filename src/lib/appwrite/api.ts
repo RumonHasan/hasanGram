@@ -4,6 +4,7 @@ import { account } from './config';
 import { avatars } from './config';
 import { databases } from './config';
 import { appwriteConfig } from './config';
+import { Query } from 'appwrite';
 
 // function for creating new user after getting the details from the zod form
 export async function createUserAcount(user: INewUser) {
@@ -45,6 +46,33 @@ export async function saveUserToDB(user: {
       user
     );
     return newUser;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// appwrite function to sign in
+export async function signInAccount(user: { email: string; password: string }) {
+  try {
+    const session = await account.createEmailSession(user.email, user.password);
+    return session;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// function to get current user
+export async function getCurrentUser() {
+  try {
+    const currentAccount = await account.get();
+    if (!currentAccount) throw Error;
+    const currentUser = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      [Query.equal('accountId', currentAccount.$id)]
+    );
+    if (!currentUser) throw Error;
+    return currentUser.documents[0];
   } catch (error) {
     console.log(error);
   }

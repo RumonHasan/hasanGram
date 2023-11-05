@@ -15,11 +15,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { SignupValidationSchema } from '@/lib/validation';
 import Loader from '@/components/shared/Loader';
-import { Link } from 'react-router-dom';
-import { useCreateUserAccount } from '@/lib/react-query/queriesAndMutations';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  useCreateUserAccount,
+  useSignInAccount,
+} from '@/lib/react-query/queriesAndMutations';
+import { useUserContext } from '@/context/AuthContext';
 
 const SignupForm = () => {
   const { toast } = useToast();
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const navigate = useNavigate();
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidationSchema>>({
     resolver: zodResolver(SignupValidationSchema),
@@ -33,8 +39,11 @@ const SignupForm = () => {
 
   // mutate async is the mutation function in the react query
   // everything in this particular function fetches data from react query as it is in the middle
-  const { mutateAsync: createUserAcount, isLoading: isCreatingUser } =
+  const { mutateAsync: createUserAcount, isPending: isCreatingUser } =
     useCreateUserAccount();
+
+  const { mutateAsync: signInAccount, isPending: isSigningIn } =
+    useSignInAccount();
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignupValidationSchema>) {
@@ -42,9 +51,26 @@ const SignupForm = () => {
     const newUser = await createUserAcount(values);
     if (!newUser) {
       return toast({
-        title: 'Sign in failed, please try again boi',
+        title: 'Sign up failed, please try again boi',
       });
-      // const session = await signInAccount();
+    }
+    const session = await signInAccount({
+      email: values.email,
+      password: values.password,
+    });
+    if (!session) {
+      return toast({
+        title: 'Sign in failed',
+      });
+    }
+    const isLoggedIn = await checkAuthUser();
+    if (isLoggedIn) {
+      form.reset();
+      navigate('/');
+    } else {
+      return toast({
+        title: 'sign up failed, Please try again',
+      });
     }
   }
   return (
