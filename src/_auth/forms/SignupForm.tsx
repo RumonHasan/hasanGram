@@ -3,19 +3,23 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { SignupValidationSchema } from '@/lib/validation';
+import Loader from '@/components/shared/Loader';
+import { Link } from 'react-router-dom';
+import { useCreateUserAccount } from '@/lib/react-query/queriesAndMutations';
 
 const SignupForm = () => {
+  const { toast } = useToast();
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidationSchema>>({
     resolver: zodResolver(SignupValidationSchema),
@@ -27,11 +31,21 @@ const SignupForm = () => {
     },
   });
 
+  // mutate async is the mutation function in the react query
+  // everything in this particular function fetches data from react query as it is in the middle
+  const { mutateAsync: createUserAcount, isLoading: isCreatingUser } =
+    useCreateUserAccount();
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof SignupValidationSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof SignupValidationSchema>) {
+    // create new user
+    const newUser = await createUserAcount(values);
+    if (!newUser) {
+      return toast({
+        title: 'Sign in failed, please try again boi',
+      });
+      // const session = await signInAccount();
+    }
   }
   return (
     <Form {...form}>
@@ -89,7 +103,7 @@ const SignupForm = () => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input type="password" className="shad-input" {...field} />
                 </FormControl>
@@ -97,7 +111,18 @@ const SignupForm = () => {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit" className="shad-button_primary">
+            {isCreatingUser ? <Loader /> : 'Sign Up'}
+          </Button>
+          <p className="text-small-regular text-light-2 text-center mt-2">
+            Already have an account?
+            <Link
+              to="./sign-in"
+              className="text-primary-500 text-small-semibold ml-1"
+            >
+              Log In
+            </Link>
+          </p>
         </form>
       </div>
     </Form>
