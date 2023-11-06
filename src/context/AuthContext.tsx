@@ -31,8 +31,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    //localStorage.getItem('cookieFallback') === null
-    if (localStorage.getItem('cookieFallback') === '[]') {
+    if (
+      // if there is no current session then fall back to sign in page
+      localStorage.getItem('cookieFallback') === null ||
+      localStorage.getItem('cookieFallback') === '[]'
+    ) {
       navigate('/sign-in');
     }
     checkAuthUser();
@@ -75,4 +78,5 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default AuthProvider;
+// eslint-disable-next-line react-refresh/only-export-components
 export const useUserContext = () => useContext(AuthContext);

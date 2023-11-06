@@ -77,3 +77,13 @@ export async function getCurrentUser() {
     console.log(error);
   }
 }
+
+// function get sign out account and getting rid of the current session but deleting based on the cookieFallback
+export async function signOutAccount() {
+  try {
+    const deletedSession = await account.deleteSession('current');
+    return deletedSession;
+  } catch (error) {
+    console.log('unable to delete session', error);
+  }
+}

@@ -9,3 +9,11 @@ export const SignupValidationSchema = z.object({
     .string()
     .min(8, { message: 'Password must be of atleast 8 chars' }),
 });
+
+// sign in validation
+export const SigninValidationSchema = z.object({
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(8, { message: 'Password must be of atleast 8 chars' }),
+});
