@@ -38,6 +38,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     ) {
       navigate('/sign-in');
     }
+    // assigns the current session user to the user so it can be injected into the context
     checkAuthUser();
   }, []);
 
@@ -64,7 +65,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
     }
   };
-
   const value = {
     user,
     setUser,
