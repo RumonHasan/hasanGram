@@ -3,6 +3,7 @@ import Navbar from '@/components/shared/Navbar';
 import SidebarLeft from '@/components/shared/SidebarLeft';
 import { Outlet } from 'react-router-dom';
 
+// contains the main layout that displays based on the screen size whether its desktop or mobile
 const RootLayout = () => {
   return (
     <div className="w-full md:flex">
