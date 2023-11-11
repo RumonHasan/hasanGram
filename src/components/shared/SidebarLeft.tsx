@@ -28,7 +28,7 @@ const SidebarLeft = () => {
         </Link>
         <Link to={`/profile/${user.id}`} className="flex gap-3 items-center">
           <img
-            src={user.imageUrl || '/assets/images/profile-placeholder.svg'}
+            src={user.imageUrl || '/assets/icons/profile-placeholder.svg'}
             height={40}
             width={40}
             className="rounded-full"
