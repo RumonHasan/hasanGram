@@ -51,6 +51,7 @@ export const multiFormatDateString = (timestamp: string = ''): string => {
   }
 };
 
+// checks if the current User id is present in the like list or not after its clicked
 export const checkIsLiked = (likeList: string[], userId: string) => {
   return likeList.includes(userId);
 };

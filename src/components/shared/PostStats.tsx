@@ -6,7 +6,8 @@ import {
 } from '@/lib/react-query/queriesAndMutations';
 import { checkIsLiked } from '@/lib/utils';
 import { Models } from 'appwrite';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Loader from './Loader';
 
 type PostStatsProps = {
   post: Models.Document;
@@ -20,10 +21,18 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
 
   // mutation abstractions for like and save
   const { mutate: likePost } = useLikePost();
-  const { mutate: savePost } = useSavePost();
-  const { mutate: deletedSavedPost } = useDeleteSavedPost();
+  const { mutate: savePost, isPending: isSavingPost } = useSavePost();
+  const { mutate: deletedSavedPost, isPending: isDeletingSavedPost } =
+    useDeleteSavedPost();
 
   const { data: currentUser } = useGetCurrentUser();
+  const savedPostRecord = currentUser?.save.find(
+    (record: Models.Document) => record.post.$id === post.$id
+  );
+  // to check for saved
+  useEffect(() => {
+    setIsSaved(!!savedPostRecord);
+  }, [currentUser, savedPostRecord]);
 
   const handleLikePost = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -35,13 +44,12 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     }
     setLikes(newLikes);
     likePost({ postId: post.$id, likesArray: newLikes });
+    console.log(newLikes);
   };
 
   const handleSavedPost = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const savedPostRecord = currentUser?.save.find(
-      (record: Models.Document) => record.$id === post.$id
-    );
+
     // deletes the saved post if it gets clicked again
     if (savedPostRecord) {
       setIsSaved(false);
@@ -67,17 +75,22 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
           width={20}
           height={20}
         />
+
         <p className="small-medium lg:base-medium">{likes.length}</p>
       </div>
       <div className="flex gap-2 ">
-        <img
-          onClick={handleSavedPost}
-          className="cursor-pointer"
-          src={isSaved ? '/assets/icons/saved.svg' : '/assets/icons/save.svg'}
-          alt="heart"
-          width={20}
-          height={20}
-        />
+        {isSavingPost || isDeletingSavedPost ? (
+          <Loader />
+        ) : (
+          <img
+            onClick={handleSavedPost}
+            className="cursor-pointer"
+            src={isSaved ? '/assets/icons/saved.svg' : '/assets/icons/save.svg'}
+            alt="heart"
+            width={20}
+            height={20}
+          />
+        )}
       </div>
     </div>
   );
