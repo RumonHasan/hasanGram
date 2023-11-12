@@ -25,8 +25,7 @@ type PostFormProps = {
 };
 
 const PostForm = ({ post }: PostFormProps) => {
-  const { mutateAsync: createPost, isPending: isLoadingCreate } =
-    useCreatePost();
+  const { mutateAsync: createPost } = useCreatePost();
   const navigate = useNavigate();
   const { user } = useUserContext();
   const { toast } = useToast();
