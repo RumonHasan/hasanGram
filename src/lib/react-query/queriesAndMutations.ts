@@ -10,6 +10,7 @@ import {
   getCurrentUser,
   getPostById,
   updatePost,
+  deletePost,
 } from '../appwrite/api';
 import { INewPost, INewUser, IUpdatePost } from '@/types';
 import { signInAccount } from '../appwrite/api';
@@ -154,6 +155,20 @@ export const useUpdatePost = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
+      });
+    },
+  });
+};
+
+// deleting a post
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ postId, imageId }: { postId: string; imageId: string }) =>
+      deletePost(postId, imageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
       });
     },
   });
