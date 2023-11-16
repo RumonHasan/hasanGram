@@ -1,9 +1,10 @@
 import Loader from './Loader';
 import GridPostList from './GridPostList';
+import { Models } from 'appwrite';
 
 type SearchResultProps = {
   isSearchFetching: boolean;
-  searchPosts?: unknown;
+  searchPosts: Models.Document;
 };
 const SearchResults = ({
   isSearchFetching,
