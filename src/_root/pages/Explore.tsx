@@ -31,9 +31,11 @@ const Explore = () => {
   }
 
   const shouldShowSearchResults = searchValue !== '';
+  console.log(posts);
   const shouldShowPosts =
     !shouldShowSearchResults &&
-    posts.pages.every((item) => item?.documents.length === 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    posts?.pages?.every((item: any) => item?.documents.length === 0);
 
   return (
     <div className="explore-container">
@@ -76,9 +78,11 @@ const Explore = () => {
         ) : shouldShowPosts ? (
           <p className="text-light-4 mt-10 text-center w-full">End of posts</p>
         ) : (
-          posts.pages.map((item, index) => (
-            <GridPostList key={`page-${index}`} posts={item?.documents} />
-          ))
+          posts?.pages.map((item, index) => {
+            const pageDocuments = item && item?.documents;
+            console.log(pageDocuments);
+            return <GridPostList key={`page-${index}`} posts={pageDocuments} />;
+          })
         )}
       </div>
       {hasNextPage && !searchValue && (
