@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import GridPostList from '@/components/shared/GridPostList';
-import SearchResults from '@/components/shared/SearchResults';
 import { Input } from '@/components/ui/input';
 import useDebounce from '@/hooks/useDebounce';
 import {
@@ -10,32 +10,53 @@ import { Loader } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 
+export type SearchResultProps = {
+  isSearchFetching: boolean;
+  searchedPosts: any;
+};
+
+// seggrated component for search results
+const SearchResults = ({
+  isSearchFetching,
+  searchedPosts,
+}: SearchResultProps) => {
+  if (isSearchFetching) {
+    return <Loader />;
+  } else if (searchedPosts && searchedPosts.documents.length > 0) {
+    return <GridPostList posts={searchedPosts.documents} />;
+  } else {
+    return (
+      <p className="text-light-4 mt-10 text-center w-full">No results found</p>
+    );
+  }
+};
+
 const Explore = () => {
   const { ref, inView } = useInView();
   const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
+
   const [searchValue, setSearchValue] = useState('');
-  const debouncedValue = useDebounce(searchValue, 500);
-  const { data: searchPosts, isFetching: isSearchFetching } =
-    useSearchPosts(debouncedValue);
+  const debouncedSearch = useDebounce(searchValue, 500);
+  const { data: searchedPosts, isFetching: isSearchFetching } =
+    useSearchPosts(debouncedSearch);
 
   useEffect(() => {
-    if (inView && !searchValue) fetchNextPage();
+    if (inView && !searchValue) {
+      fetchNextPage();
+    }
   }, [fetchNextPage, inView, searchValue]);
 
-  if (!posts) {
+  if (!posts)
     return (
       <div className="flex-center w-full h-full">
         <Loader />
       </div>
     );
-  }
 
   const shouldShowSearchResults = searchValue !== '';
-  console.log(posts);
   const shouldShowPosts =
     !shouldShowSearchResults &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    posts?.pages?.every((item: any) => item?.documents.length === 0);
+    posts.pages.every((item) => item?.documents.length === 0);
 
   return (
     <div className="explore-container">
@@ -53,12 +74,17 @@ const Explore = () => {
             placeholder="Search"
             className="explore-search"
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            onChange={(e) => {
+              const { value } = e.target;
+              setSearchValue(value);
+            }}
           />
         </div>
       </div>
+
       <div className="flex-between w-full max-w-5xl mt-16 mb-7">
         <h3 className="body-bold md:h3-bold">Popular Today</h3>
+
         <div className="flex-center gap-3 bg-dark-3 rounded-xl px-4 py-2 cursor-pointer">
           <p className="small-medium md:base-medium text-light-2">All</p>
           <img
@@ -69,22 +95,22 @@ const Explore = () => {
           />
         </div>
       </div>
+
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
         {shouldShowSearchResults ? (
           <SearchResults
             isSearchFetching={isSearchFetching}
-            searchPosts={searchPosts}
+            searchedPosts={searchedPosts}
           />
         ) : shouldShowPosts ? (
           <p className="text-light-4 mt-10 text-center w-full">End of posts</p>
         ) : (
-          posts?.pages.map((item, index) => {
-            const pageDocuments = item && item?.documents;
-            console.log(pageDocuments);
-            return <GridPostList key={`page-${index}`} posts={pageDocuments} />;
-          })
+          posts.pages.map((item, index) => (
+            <GridPostList key={`page-${index}`} posts={item?.documents} />
+          ))
         )}
       </div>
+
       {hasNextPage && !searchValue && (
         <div ref={ref} className="mt-10">
           <Loader />

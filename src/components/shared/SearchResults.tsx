@@ -4,7 +4,7 @@ import { Models } from 'appwrite';
 
 type SearchResultProps = {
   isSearchFetching: boolean;
-  searchPosts: Models.Document;
+  searchPosts: Models.Document[] | Models.Document | undefined;
 };
 const SearchResults = ({
   isSearchFetching,
@@ -12,8 +12,16 @@ const SearchResults = ({
 }: SearchResultProps) => {
   if (!isSearchFetching) return <Loader />;
 
-  if (searchPosts && searchPosts?.documents.length > 0)
-    return <GridPostList posts={searchPosts?.documents} />;
+  if (searchPosts) {
+    if (Array.isArray(searchPosts) && searchPosts.length > 0) {
+      return <GridPostList posts={searchPosts} />;
+    } else if (
+      !Array.isArray(searchPosts) &&
+      searchPosts.documents.length > 0
+    ) {
+      return <GridPostList posts={[searchPosts]} />;
+    }
+  }
 
   return (
     <p className="text-light-4 mt-10 text-center w-full">
